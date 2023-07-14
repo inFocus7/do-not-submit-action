@@ -24,8 +24,8 @@ IGNORE_LIST=$3
 FILES=("${@:4}")
 
 # TODO: What would be a good separator? `,`, `|`, or google's way and use `\n` here? (https://github.com/google-github-actions/get-secretmanager-secrets#inputs)
-IFS='|' read -ra check_list_array <<< "$CHECK_LIST"
-IFS='|' read -ra ignore_list_array <<< "$IGNORE_LIST"
+IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
+IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
 
 # O(N+M), where N is the number of ignored checks, and M is the number of checks.
 file_matches_check() {

@@ -13,7 +13,6 @@ inputs:
     description: 'A list of files to ignore when searching for the keyword'
     required: false
     default: ''
-outputs: {} # TODO??
 runs:
   using: "composite"
   steps:
@@ -23,5 +22,4 @@ runs:
     - name: Check files for ${{ inputs.keyword }}
       id: check-files
       shell: bash
-      # TODO: Does `all_modified_files` include new, copied, and type_changed files?
       run: ./do-not-submit.sh ${{ inputs.keyword }} ${{ inputs.allow_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
