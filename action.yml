@@ -1,0 +1,25 @@
+name: 'Do Not Submit'
+description: 'Prevent pull requests from being submitted by failing if changes contain a key word'
+inputs:
+  keyword:
+    description: 'The keyword to search for in the file changes. Must not be empty.'
+    required: true
+    default: 'DO_NOT_SUBMIT'
+  check_list:
+    description: 'A list of files to search for the keyword'
+    required: true
+    default: '*'
+  ignore_list:
+    description: 'A list of files to ignore when searching for the keyword'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Fetch changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v37
+    - name: Check files for ${{ inputs.keyword }}
+      id: check-files
+      shell: bash
+      run: ./do-not-submit.sh ${{ inputs.keyword }} ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
