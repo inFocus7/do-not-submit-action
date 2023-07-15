@@ -35,18 +35,16 @@ file_matches_check() {
   # When no ignore list is set, it is ''. Make sure this doesn't match anything in that case.
   for ignore in "${ignore_list_array[@]}"; do
     if [[ "$filename" == $ignore ]]; then
-      echo "Ignoring $filename..."
-      return 1
+      return -1
     fi
   done
 
   for check in "${check_list_array[@]}"; do
     if [[ "$filename" == $check ]]; then
-      echo "Checking $filename..."
       return 0
     fi
   done
-  return 1
+  return -1
 }
 
 # TODO: Add support for inline comments at first, then add support for block comments at a later date.
@@ -55,7 +53,7 @@ file_matches_check() {
 # *.html: "<!-- ... -->"
 # *.css, *.scss: "/* ... */"
 # *.sh, *.yaml, *.yml: "#"
-# How to handle plaintext files, as well as markdown files?
+# TODO: How to handle markdown files? https://www.jamestharpe.com/markdown-comments/
 get_do_not_submit_regex() {
   local filename="$1"
   # Gets the files extension after the last period. (e.g. "foo.bar.baz" -> "baz")
@@ -73,20 +71,20 @@ get_do_not_submit_regex() {
       echo "[[:space:]]*#[[:space:]]*$KEYWORD"
       ;;
     *)
-      echo "[[:space:]]*$KEYWORD" # Default case, no matching file extension
+      # Default case, no matching file extension
+      echo "[[:space:]]*$KEYWORD"
       ;;
   esac
 }
 
 file_count=0
+# TODO: We could possibly do an approach using `grep` https://github.com/inFocus7/do-not-submit-action/issues/2
 for filename in "${FILES[@]}"; do
-  echo "Checking $filename..."
   if file_matches_check "$filename"; then
-    echo "Searching $filename for $KEYWORD..."
     ((file_count++))
     line_number=1
     DO_NOT_SUBMIT_REGEX=$(get_do_not_submit_regex "$filename")
-    # `read` reads lines with newline characters, so we add the check that $line is not empty as well
+    # `read` reads lines with newline characters, so we add the check that $line is not empty as well to handle the last line.
     while IFS= read -r line || [[ -n $line ]]; do
       if [[ "$line" =~ $DO_NOT_SUBMIT_REGEX ]]; then
         OUTPUT="${OUTPUT}$filename:$line_number contains $KEYWORD${NEWLINE}"
