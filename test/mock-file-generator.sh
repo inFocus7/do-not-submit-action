@@ -7,7 +7,7 @@
 extensions=("go" "py" "cpp" "c" "js" "ts" "jsx" "tsx")
 keyword="DO_NOT_SUBMIT"
 lorem_ipsum="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-mkdir -p src
+mkdir -p data
 
 get_code() {
   local extension="$1"
