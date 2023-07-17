@@ -21,3 +21,6 @@
 go.work
 
 .idea
+
+# Ignore folder where the mock files are stored
+/test/data
