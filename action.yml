@@ -6,9 +6,9 @@ inputs:
     required: true
     default: 'DO_NOT_SUBMIT'
   check_list:
-    description: 'A list of files to search for the keyword'
+    description: 'A list of files to search for the keyword. If using wildcards, be sure to wrap the list in quotes.'
     required: true
-    default: '*'
+    default: '"*"'
   ignore_list:
     description: 'A list of files to ignore when searching for the keyword'
     required: false
