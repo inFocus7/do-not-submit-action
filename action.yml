@@ -23,5 +23,4 @@ runs:
     - name: Check files for ${{ inputs.keyword }}
       id: check-files
       shell: bash
-      working-directory: ./
-      run: ./do-not-submit.sh ${{ inputs.keyword }} ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
+      run: ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
