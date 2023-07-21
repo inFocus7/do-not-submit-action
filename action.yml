@@ -12,7 +12,7 @@ inputs:
   ignore_list:
     description: 'A list of files to ignore when searching for the keyword'
     required: false
-    default: ''
+    default: '""' # Default to `""` so the first changed file is not ignored
 runs:
   using: "composite"
   steps:
