@@ -17,6 +17,8 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3 # checkout to use do-not-submit
+      with:
+        fetch-depth: 0
     - name: Fetch changed files
       id: changed-files
       uses: tj-actions/changed-files@v37
