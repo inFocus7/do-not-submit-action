@@ -59,7 +59,7 @@ get_do_not_submit_regex() {
   local file_extension="${filename##*.}"
 
   case $file_extension in
-    go|proto|java|js|ts|cpp|c|php|tsx|jsx)
+    go|mod|proto|java|js|ts|cpp|c|php|tsx|jsx)
       echo "[[:space:]]*//[[:space:]]*$KEYWORD"
       ;;
     py)
