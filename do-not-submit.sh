@@ -2,6 +2,7 @@
 
 # do-not-submit.sh takes the following arguments
 # 1. The keyword to cause a failure on
+# 2. Whether the action should pass or fail if a KEYWORD is found ("fail", "warn")
 # 2. A list (as a string) representing which files to check for the keyword.
 # 3. (optional) A list (as a string) representing which files to NOT check for the keyword.
 # 4. A list of modified files to check for the keyword.
@@ -9,8 +10,8 @@
 # If the keyword is present, the script exits with 1.
 # This initial implementation only checks files for single-line comments.
 
-if [[ "$#" -lt 4 ]]; then
-  echo "Usage: $0 keyword check_list ignore_list filename [filenames ...]"
+if [[ "$#" -lt 5 ]]; then
+  echo "Usage: $0 keyword failure_type check_list ignore_list filename [filenames ...]"
   exit 1
 fi
 
@@ -18,15 +19,19 @@ NEWLINE=$'\n'
 OUTPUT=""
 
 KEYWORD=$1
-CHECK_LIST=$2
-IGNORE_LIST=$3
+FAILURE_TYPE=$2
+CHECK_LIST=$3
+IGNORE_LIST=$4
 # Gets the rest of the arguments - which should be the list of files - as an array.
-FILES=("${@:4}")
+FILES=("${@:5}")
 
 IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
 IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
 
 # O(N+M), where N is the number of ignored checks, and M is the number of checks.
+total_files=${#FILES[@]}
+files_checked=0
+files_ignored=0
 file_matches_check() {
   local filename=$1
 
@@ -34,12 +39,14 @@ file_matches_check() {
   # When no ignore list is set, it is ''. Make sure this doesn't match anything in that case.
   for ignore in "${ignore_list_array[@]}"; do
     if [[ "$filename" == $ignore ]]; then
+      ((files_ignored++))
       return 1
     fi
   done
 
   for check in "${check_list_array[@]}"; do
     if [[ "$filename" == $check ]]; then
+      ((files_checked++))
       return 0
     fi
   done
@@ -76,10 +83,8 @@ get_do_not_submit_regex() {
   esac
 }
 
-file_count=0
 for filename in "${FILES[@]}"; do
   if file_matches_check "$filename"; then
-    ((file_count++))
     DO_NOT_SUBMIT_REGEX=$(get_do_not_submit_regex "$filename")
     grep_output=$(grep -Hn "$DO_NOT_SUBMIT_REGEX" "$filename")
     if [[ -n "$grep_output" ]]; then
@@ -88,10 +93,23 @@ for filename in "${FILES[@]}"; do
   fi
 done
 
+echo "--- $KEYWORD Search Results ---"
+echo "From $total_files files, $files_checked files were searched, and $files_ignored files were ignored."
 if [[ "$OUTPUT" == "" ]]; then
-  echo "$file_count files checked, none contained $KEYWORD"
-  exit 0
+  echo "KEYWORD_MATCHED=false" >> "$GITHUB_OUTPUT"
+  echo "No checked files contained \"$KEYWORD\"."
 else
+  echo "KEYWORD_MATCHED=true" >> "$GITHUB_OUTPUT"
+  echo "Usages of $KEYWORD found in the following:"
   echo "$OUTPUT"
-  exit 1
+
+  if [[ "$FAILURE_TYPE" == "fail" ]]; then
+    echo "::error ::Instances of \"$KEYWORD\" were found in files."
+    exit 1
+  elif [[ "$FAILURE_TYPE" == "warn" ]]; then
+    echo "::warning ::Instances of \"$KEYWORD\" were found in files, but the action is configured to warn instead of fail."
+    exit 0
+  fi
 fi
+
+exit 0

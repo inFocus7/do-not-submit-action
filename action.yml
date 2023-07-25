@@ -5,6 +5,10 @@ inputs:
     description: 'The keyword to search for in the file changes. Must not be empty.'
     required: true
     default: 'DO_NOT_SUBMIT'
+  should_fail:
+    description: 'Whether the action should fail if the keyword is found. If false, the action will succeed even when the keyword is found.'
+    required: false
+    default: 'true'
   check_list:
     description: 'A list of files to search for the keyword. If using wildcards, be sure to wrap the list in quotes.'
     required: true
@@ -23,4 +27,11 @@ runs:
     - name: Check files for ${{ inputs.keyword }}
       id: check-files
       shell: bash
-      run: ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
+      run: |
+        if [[ ${{ inputs.should_fail }} == 'true' ]]; then
+          fail_type='fail'
+        else
+          fail_type='warn'
+        fi
+        
+        ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} "$fail_type" ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
