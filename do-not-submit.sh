@@ -29,6 +29,9 @@ IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
 IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
 
 # O(N+M), where N is the number of ignored checks, and M is the number of checks.
+total_files=${#FILES[@]}
+files_checked=0
+files_ignored=0
 file_matches_check() {
   local filename=$1
 
@@ -36,12 +39,14 @@ file_matches_check() {
   # When no ignore list is set, it is ''. Make sure this doesn't match anything in that case.
   for ignore in "${ignore_list_array[@]}"; do
     if [[ "$filename" == $ignore ]]; then
+      ((files_ignored++))
       return 1
     fi
   done
 
   for check in "${check_list_array[@]}"; do
     if [[ "$filename" == $check ]]; then
+      ((files_checked++))
       return 0
     fi
   done
@@ -78,10 +83,8 @@ get_do_not_submit_regex() {
   esac
 }
 
-file_count=0
 for filename in "${FILES[@]}"; do
   if file_matches_check "$filename"; then
-    ((file_count++))
     DO_NOT_SUBMIT_REGEX=$(get_do_not_submit_regex "$filename")
     grep_output=$(grep -Hn "$DO_NOT_SUBMIT_REGEX" "$filename")
     if [[ -n "$grep_output" ]]; then
@@ -91,12 +94,13 @@ for filename in "${FILES[@]}"; do
 done
 
 echo "--- $KEYWORD Search Results ---"
+echo "From $total_files files, $files_checked files were searched, and $files_ignored files were ignored."
 if [[ "$OUTPUT" == "" ]]; then
   echo "KEYWORD_MATCHED=false" >> "$GITHUB_OUTPUT"
-  echo "$file_count files checked, none contained $KEYWORD"
+  echo "No checked files contained \"$KEYWORD\"."
 else
   echo "KEYWORD_MATCHED=true" >> "$GITHUB_OUTPUT"
-  echo "Usages of $KEYWORD found in $file_count files:"
+  echo "Usages of $KEYWORD found in the following:"
   echo "$OUTPUT"
 
   if [[ "$FAILURE_TYPE" == "fail" ]]; then
