@@ -3,8 +3,6 @@ Fail CI if a keyword is found in any of the changed files.
 
 ## Action Definition
 
-### Inputs
-
 | Input   | Description | Default Value |
 |----|----|----|
 | keyword  | The keyword to search for in the file changes. | `DO_NOT_SUBMIT` |
