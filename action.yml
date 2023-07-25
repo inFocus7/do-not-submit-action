@@ -34,11 +34,12 @@ runs:
       run: |
         echo "${{ steps.check-files.outputs.KEYWORD_INSTANCES }}"
     - if: inputs.should_fail == 'false' && steps.check-files.outputs.KEYWORD_MATCHED == 'true'
+      name: Adding warning annotation if necessary
       shell: bash
       run: |
         echo "::warning ::Instances of the keyword '${{ inputs.keyword }}' were found in files, but the action was configured to succeed anyway."
     - if: inputs.should_fail == 'true' && steps.check-files.outputs.KEYWORD_MATCHED == 'true'
+      name: Failing if necessary
       shell: bash
       run: |
         echo "::error ::Instances of the keyword '${{ inputs.keyword }}' were found in files."
-        exit 1
