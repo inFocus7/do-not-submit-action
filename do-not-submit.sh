@@ -2,6 +2,7 @@
 
 # do-not-submit.sh takes the following arguments
 # 1. The keyword to cause a failure on
+# 2. Whether the action should pass or fail if a KEYWORD is found ("fail", "warn")
 # 2. A list (as a string) representing which files to check for the keyword.
 # 3. (optional) A list (as a string) representing which files to NOT check for the keyword.
 # 4. A list of modified files to check for the keyword.
@@ -9,8 +10,8 @@
 # If the keyword is present, the script exits with 1.
 # This initial implementation only checks files for single-line comments.
 
-if [[ "$#" -lt 4 ]]; then
-  echo "Usage: $0 keyword check_list ignore_list filename [filenames ...]"
+if [[ "$#" -lt 5 ]]; then
+  echo "Usage: $0 keyword failure_type check_list ignore_list filename [filenames ...]"
   exit 1
 fi
 
@@ -18,10 +19,11 @@ NEWLINE=$'\n'
 OUTPUT=""
 
 KEYWORD=$1
-CHECK_LIST=$2
-IGNORE_LIST=$3
+FAILURE_TYPE=$2
+CHECK_LIST=$3
+IGNORE_LIST=$4
 # Gets the rest of the arguments - which should be the list of files - as an array.
-FILES=("${@:4}")
+FILES=("${@:5}")
 
 IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
 IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
@@ -91,13 +93,19 @@ done
 echo "--- $KEYWORD Search Results ---"
 if [[ "$OUTPUT" == "" ]]; then
   echo "KEYWORD_MATCHED=false" >> "$GITHUB_OUTPUT"
-
   echo "$file_count files checked, none contained $KEYWORD"
 else
   echo "KEYWORD_MATCHED=true" >> "$GITHUB_OUTPUT"
-
   echo "Usages of $KEYWORD found in $file_count files:"
   echo "$OUTPUT"
+
+  if [[ "$FAILURE_TYPE" == "fail" ]]; then
+    echo "::error ::Instances of \"$KEYWORD\" were found in files."
+    exit 1
+  elif [[ "$FAILURE_TYPE" == "warn" ]]; then
+    echo "::warning ::Instances of \"$KEYWORD\" were found in files, but the action is configured to warn instead of fail."
+    exit 0
+  fi
 fi
 
 exit 0
