@@ -88,11 +88,15 @@ for filename in "${FILES[@]}"; do
   fi
 done
 
+echo "--- $KEYWORD Search Results ---"
 if [[ "$OUTPUT" == "" ]]; then
   echo "KEYWORD_MATCHED=false" >> "$GITHUB_OUTPUT"
+
   echo "$file_count files checked, none contained $KEYWORD"
 else
   echo "KEYWORD_MATCHED=true" >> "$GITHUB_OUTPUT"
+
+  echo "Usages of $KEYWORD found in $file_count files:"
   echo "$OUTPUT"
 fi
 
