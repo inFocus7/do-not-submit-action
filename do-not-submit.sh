@@ -9,8 +9,8 @@
 # If the keyword is present, the script exits with 1.
 # This initial implementation only checks files for single-line comments.
 
-if [[ "$#" -lt 4 ]]; then
-  echo "Usage: $0 keyword check_list ignore_list filename [filenames ...]"
+if [[ "$#" -lt 5 ]]; then
+  echo "Usage: $0 keyword fail_type check_list ignore_list filename [filenames ...]"
   exit 1
 fi
 
@@ -18,10 +18,11 @@ NEWLINE=$'\n'
 OUTPUT=""
 
 KEYWORD=$1
-CHECK_LIST=$2
-IGNORE_LIST=$3
+FAIL_TYPE=$2
+CHECK_LIST=$3
+IGNORE_LIST=$4
 # Gets the rest of the arguments - which should be the list of files - as an array.
-FILES=("${@:4}")
+FILES=("${@:5}")
 
 IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
 IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
@@ -93,5 +94,9 @@ if [[ "$OUTPUT" == "" ]]; then
   exit 0
 else
   echo "$OUTPUT"
+  if [[ "$FAIL_TYPE" == "warn" ]]; then
+    exit 0
+  fi
+
   exit 1
 fi
