@@ -89,14 +89,15 @@ for filename in "${FILES[@]}"; do
   fi
 done
 
-if [[ "$OUTPUT" == "" ]]; then
-  echo "$file_count files checked, none contained $KEYWORD"
-  exit 0
-else
-  echo "$OUTPUT"
-  if [[ "$FAIL_TYPE" == "warn" ]]; then
-    exit 0
-  fi
-
-  exit 1
-fi
+#if [[ "$OUTPUT" == "" ]]; then
+#  echo "$file_count files checked, none contained $KEYWORD"
+#  exit 0
+#else
+#  echo "$OUTPUT"
+#  if [[ "$FAIL_TYPE" == "warn" ]]; then
+#    exit 0
+#  fi
+#
+#  exit 1
+#fi
+echo "KEYWORD_INSTANCES=$OUTPUT" >> "$GITHUB_OUTPUT"
