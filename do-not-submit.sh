@@ -9,7 +9,7 @@
 # If the keyword is present, the script exits with 1.
 # This initial implementation only checks files for single-line comments.
 
-if [[ "$#" -lt 5 ]]; then
+if [[ "$#" -lt 4 ]]; then
   echo "Usage: $0 keyword fail_type check_list ignore_list filename [filenames ...]"
   exit 1
 fi
@@ -18,11 +18,10 @@ NEWLINE=$'\n'
 OUTPUT=""
 
 KEYWORD=$1
-FAIL_TYPE=$2
-CHECK_LIST=$3
-IGNORE_LIST=$4
+CHECK_LIST=$2
+IGNORE_LIST=$3
 # Gets the rest of the arguments - which should be the list of files - as an array.
-FILES=("${@:5}")
+FILES=("${@:4}")
 
 IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
 IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
@@ -34,13 +33,13 @@ file_matches_check() {
   # Checking that we shouldn't ignore the file first.
   # When no ignore list is set, it is ''. Make sure this doesn't match anything in that case.
   for ignore in "${ignore_list_array[@]}"; do
-    if [[ "$filename" == $ignore ]]; then
+    if [[ "$filename" == "$ignore" ]]; then
       return 1
     fi
   done
 
   for check in "${check_list_array[@]}"; do
-    if [[ "$filename" == $check ]]; then
+    if [[ "$filename" == "$check" ]]; then
       return 0
     fi
   done
@@ -89,15 +88,12 @@ for filename in "${FILES[@]}"; do
   fi
 done
 
-#if [[ "$OUTPUT" == "" ]]; then
-#  echo "$file_count files checked, none contained $KEYWORD"
-#  exit 0
-#else
-#  echo "$OUTPUT"
-#  if [[ "$FAIL_TYPE" == "warn" ]]; then
-#    exit 0
-#  fi
-#
-#  exit 1
-#fi
-echo "KEYWORD_INSTANCES=$OUTPUT" >> "$GITHUB_OUTPUT"
+if [[ "$OUTPUT" == "" ]]; then
+  echo "KEYWORD_MATCHED=false" >> "$GITHUB_OUTPUT"
+  echo "$file_count files checked, none contained $KEYWORD"
+else
+  echo "KEYWORD_MATCHED=true" >> "$GITHUB_OUTPUT"
+  echo "$OUTPUT"
+fi
+
+exit 0

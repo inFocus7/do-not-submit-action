@@ -28,22 +28,16 @@ runs:
       id: check-files
       shell: bash
       run: |
-        if [[ "${{ inputs.should_fail }}" == "true" ]]; then
-          should_fail="fail"
-        else
-          should_fail="warn"
-        fi
-
-        ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} "$should_fail" ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
+        ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
     - name: Print keyword instances
       shell: bash
       run: |
         echo "${{ steps.check-files.outputs.KEYWORD_INSTANCES }}"
-    - if: inputs.should_fail == 'false' && steps.check-files.outputs.KEYWORD_INSTANCES != ''
+    - if: inputs.should_fail == 'false' && steps.check-files.outputs.KEYWORD_MATCHED == 'true'
       shell: bash
       run: |
         echo "::warning ::Instances of the keyword '${{ inputs.keyword }}' were found in files, but the action was configured to succeed anyway."
-    - if: inputs.should_fail == 'true' && steps.check-files.outputs.KEYWORD_INSTANCES != ''
+    - if: inputs.should_fail == 'true' && steps.check-files.outputs.KEYWORD_MATCHED == 'true'
       shell: bash
       run: |
         echo "::error ::Instances of the keyword '${{ inputs.keyword }}' were found in files."
