@@ -10,7 +10,7 @@
 # This initial implementation only checks files for single-line comments.
 
 if [[ "$#" -lt 4 ]]; then
-  echo "Usage: $0 keyword fail_type check_list ignore_list filename [filenames ...]"
+  echo "Usage: $0 keyword check_list ignore_list filename [filenames ...]"
   exit 1
 fi
 
@@ -33,13 +33,13 @@ file_matches_check() {
   # Checking that we shouldn't ignore the file first.
   # When no ignore list is set, it is ''. Make sure this doesn't match anything in that case.
   for ignore in "${ignore_list_array[@]}"; do
-    if [[ "$filename" == "$ignore" ]]; then
+    if [[ "$filename" == $ignore ]]; then
       return 1
     fi
   done
 
   for check in "${check_list_array[@]}"; do
-    if [[ "$filename" == "$check" ]]; then
+    if [[ "$filename" == $check ]]; then
       return 0
     fi
   done
