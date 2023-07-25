@@ -30,9 +30,13 @@ runs:
       run: |
         ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
     - name: Print keyword instances
+      if: steps.check-files.outputs.KEYWORD_MATCHED == 'true'
       shell: bash
       run: |
+        echo "---"
+        echo "Usages of the keyword '${{ inputs.keyword }}' were found in the following files:"
         echo "${{ steps.check-files.outputs.KEYWORD_INSTANCES }}"
+        echo "---"
     - if: inputs.should_fail == 'false' && steps.check-files.outputs.KEYWORD_MATCHED == 'true'
       name: Adding warning annotation if necessary
       shell: bash
