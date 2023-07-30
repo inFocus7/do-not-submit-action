@@ -23,7 +23,7 @@ NEWLINE=$'\n'
 OUTPUT=""
 
 # Parsing command-line options
-while getopts ":k:w:x:c:i:" opt; do
+while getopts ":k:wxc:i:" opt; do
   case $opt in
     k)
       KEYWORD="$OPTARG"
