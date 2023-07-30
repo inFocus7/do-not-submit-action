@@ -119,11 +119,15 @@ else
   echo "Usages of $KEYWORD found in the following:"
   echo "$OUTPUT"
 
+  # Get number of instances of the keyword found.
+  num_instances=$(echo "$OUTPUT" | wc -l | tr -d '[:space:]')
+  num_instances=$((num_instances - 1))
+
   if [[ "$FAILURE_TYPE" == "fail" ]]; then
-    echo "::error ::Instances of \"$KEYWORD\" were found in files."
+    echo "::error ::$num_instances instance(s) of \"$KEYWORD\" were found in files."
     exit 1
   elif [[ "$FAILURE_TYPE" == "warn" ]]; then
-    echo "::warning ::Instances of \"$KEYWORD\" were found in files, but the action is configured to warn instead of fail."
+    echo "::warning ::$num_instances instance(s) of \"$KEYWORD\" were found in files."
     exit 0
   fi
 fi
