@@ -102,7 +102,8 @@ get_do_not_submit_regex() {
 for filename in "${FILES[@]}"; do
   if file_matches_check "$filename"; then
     DO_NOT_SUBMIT_REGEX=$(get_do_not_submit_regex "$filename")
-    grep_output=$(grep -Hn "$DO_NOT_SUBMIT_REGEX" "$filename")
+    # Extending grep support with (-E), so that a keyword of "EXAMPLE|DO_NOT_SUBMIT" will match both.
+    grep_output=$(grep -HEn "$DO_NOT_SUBMIT_REGEX" "$filename")
     if [[ -n "$grep_output" ]]; then
       OUTPUT="${OUTPUT}$grep_output${NEWLINE}"
     fi
