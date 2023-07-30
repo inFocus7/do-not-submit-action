@@ -1,5 +1,5 @@
-# do-not-submit-action
-Fail CI if a keyword is found in any of the changed files.
+# Do Not Submit Action
+Find instances of a keyword in any modified file(s).
 
 ## Action Definition
 
