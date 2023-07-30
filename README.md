@@ -59,6 +59,28 @@ jobs:
         check_list: '"*.go,*.proto,go.mod"'
 ```
 
+### Use Case: Ignoring files
+```yaml
+name: Run Do Not Submit Action
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Run do-not-submit action
+      uses: infocus7/do-not-submit-action@latest
+      with:
+        # Ignores all `md` and `yml` files when performing the `keyword` search.
+        ignore_list: '"*.md,*.yml"'
+```
+
 ### Use Case: Checking for ANY instance of the keyword
 ```yaml
 name: Run Do Not Submit Action
