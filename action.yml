@@ -32,16 +32,12 @@ runs:
       id: check-files
       shell: bash
       run: |
-        if [[ ${{ inputs.should_fail }} == 'true' ]]; then
-          fail_type='fail'
-        else
-          fail_type='warn'
+        if [[ ${{ inputs.should_fail }} == 'false' ]]; then
+          fail_type='-w'
         fi
         
-        if [[ ${{ inputs.smart_search }} == 'true' ]]; then
-          search_type='smart'
-        else
-          search_type='simple'
+        if [[ ${{ inputs.smart_search }} == 'false' ]]; then
+          search_type='-x'
         fi
 
-        ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} "$fail_type" "$search_type" ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
+        ${{ github.action_path }}/do-not-submit.sh -k ${{ inputs.keyword }} "$fail_type" "$search_type" -c ${{ inputs.check_list }} -i ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
