@@ -9,6 +9,10 @@ inputs:
     description: 'Whether the action should fail if the keyword is found. If false, the action will succeed even when the keyword is found.'
     required: false
     default: 'true'
+  smart_search:
+    description: 'Whether the keyword should be searched depending on the context. By default, the keyword is searched within file comments depending on the extension. If toggled off, the keyword will be searched as-is within the file.'
+    required: false
+    default: 'true'
   check_list:
     description: 'A list of files to search for the keyword. If using wildcards, be sure to wrap the list in quotes.'
     required: true
@@ -34,4 +38,10 @@ runs:
           fail_type='warn'
         fi
         
-        ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} "$fail_type" ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
+        if [[ ${{ inputs.smart_search }} == 'true' ]]; then
+          search_type='smart'
+        else
+          search_type='simple'
+        fi
+
+        ${{ github.action_path }}/do-not-submit.sh ${{ inputs.keyword }} "$fail_type" "$search_type" ${{ inputs.check_list }} ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}

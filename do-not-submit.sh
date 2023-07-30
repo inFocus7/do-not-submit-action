@@ -1,17 +1,18 @@
 #!/bin/bash
 
-# do-not-submit.sh takes the following arguments
+# do-not-submit.sh takes the following arguments:
 # 1. The keyword to cause a failure on
 # 2. Whether the action should pass or fail if a KEYWORD is found ("fail", "warn")
-# 2. A list (as a string) representing which files to check for the keyword.
-# 3. (optional) A list (as a string) representing which files to NOT check for the keyword.
-# 4. A list of modified files to check for the keyword.
+# 3. The type of search to perform ("smart", anything)
+# 4. A list (as a string) representing which files to check for the keyword.
+# 5. (optional) A list (as a string) representing which files to NOT check for the keyword.
+# 6+ Modified files to check for the keyword.
 #
 # If the keyword is present, the script exits with 1.
 # This initial implementation only checks files for single-line comments.
 
-if [[ "$#" -lt 5 ]]; then
-  echo "Usage: $0 keyword failure_type check_list ignore_list filename [filenames ...]"
+if [[ "$#" -lt 6 ]]; then
+  echo "Usage: $0 keyword failure_type search_type check_list ignore_list filename [filenames ...]"
   exit 1
 fi
 
@@ -19,11 +20,17 @@ NEWLINE=$'\n'
 OUTPUT=""
 
 KEYWORD=$1
+# Regardless of failure type we want to exit with 1 so user knows something went wrong.
+if [[ "$KEYWORD" == "" ]]; then
+  echo "::error The keyword MUST NOT be empty. Exiting."
+  exit 1
+fi
 FAILURE_TYPE=$2
-CHECK_LIST=$3
-IGNORE_LIST=$4
+SEARCH_TYPE=$3
+CHECK_LIST=$4
+IGNORE_LIST=$5
 # Gets the rest of the arguments - which should be the list of files - as an array.
-FILES=("${@:5}")
+FILES=("${@:6}")
 
 IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
 IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
@@ -62,23 +69,32 @@ file_matches_check() {
 # TODO: How to handle markdown files? https://www.jamestharpe.com/markdown-comments/
 get_do_not_submit_regex() {
   local filename="$1"
-  # Gets the files extension after the last period. (e.g. "foo.bar.baz" -> "baz")
-  local file_extension="${filename##*.}"
 
-  case $file_extension in
-    go|mod|proto|java|js|ts|cpp|c|php|tsx|jsx)
-      echo "[[:space:]]*//[[:space:]]*$KEYWORD"
-      ;;
-    py)
-      # Separating Python. When adding block comment support, Python has """ ... """ for block comments, which other's don't.
-      echo "[[:space:]]*#[[:space:]]*$KEYWORD"
-      ;;
-    sh|yaml|yml)
-      echo "[[:space:]]*#[[:space:]]*$KEYWORD"
+  case $SEARCH_TYPE in
+    smart)
+      # Gets the files extension after the last period. (e.g. "foo.bar.baz" -> "baz")
+        local file_extension="${filename##*.}"
+
+        case $file_extension in
+          go|mod|proto|java|js|ts|cpp|c|php|tsx|jsx)
+            echo "[[:space:]]*//[[:space:]]*$KEYWORD"
+            ;;
+          py)
+            # Separating Python. When adding block comment support, Python has """ ... """ for block comments, which other's don't.
+            echo "[[:space:]]*#[[:space:]]*$KEYWORD"
+            ;;
+          sh|yaml|yml)
+            echo "[[:space:]]*#[[:space:]]*$KEYWORD"
+            ;;
+          *)
+            # Default case, no matching file extension
+            echo "[[:space:]]*$KEYWORD"
+            ;;
+        esac
       ;;
     *)
-      # Default case, no matching file extension
-      echo "[[:space:]]*$KEYWORD"
+      # Default case, no matching search type, do a simple search for the keyword.
+      echo "$KEYWORD"
       ;;
   esac
 }
