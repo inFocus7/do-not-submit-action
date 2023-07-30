@@ -32,16 +32,15 @@ runs:
       id: check-files
       shell: bash
       run: |
+        action="${{ github.action_path }}/do-not-submit.sh -k ${{ inputs.keyword }}"
+
         if [[ ${{ inputs.should_fail }} == 'false' ]]; then
-          warn_opt='-w'
-        else
-          warn_opt=''
+          action+=" -w"
         fi
-        
         if [[ ${{ inputs.smart_search }} == 'false' ]]; then
-          search_type='-x'
-        else
-          search_type=''
+          action+=" -x"
         fi
 
-        ${{ github.action_path }}/do-not-submit.sh -k ${{ inputs.keyword }} "${warn_opt}" "${search_type}" -c ${{ inputs.check_list }} -i ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}
+        action+=" -c ${{ inputs.check_list }} -i ${{ inputs.ignore_list }} ${{ steps.changed-files.outputs.all_changed_files }}"
+
+        eval "$action"
