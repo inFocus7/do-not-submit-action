@@ -5,7 +5,7 @@ Fail CI if a keyword is found in any of the changed files.
 
 | Input        | Description                                                                                            | Default Value   |
 |--------------|--------------------------------------------------------------------------------------------------------|-----------------|
-| keyword      | The keyword to search for in the file changes. This parameter supports regex.                          | `DO_NOT_SUBMIT` |
+| keyword      | The keyword to search for in the file changes. This parameter supports regex and allows multi-search.  | `DO_NOT_SUBMIT` |
 | should_fail  | If the Github Action should fail if `keyword` is found.                                                | `true`          |
 | smart_search | If the `keyword` should be searched within comments (smart), or as-is anywhere in the file.            | `true`          |
 | check_list   | A comma-separated list of regex-supported files to search for the keyword in                           | `"*"`           |
