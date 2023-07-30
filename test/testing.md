@@ -19,3 +19,8 @@ Range (min … max):    9.968 s … 10.563 s    10 runs
 # Conclusion
 From local runs on the above parameters, `grep` is faster and should be used instead of line-by-line reading when searching for `$KEYWORD`.
 If any issues occur due to `grep` in a GitHub action then we can revert, but for now this is the fastest option.
+
+# Updated Note
+
+These tests were run before supporting extended regex in using `grep`. 
+I have not run any performance tests after the fact, and it is very likely that the performance is not as fast anymore - at least when using its features.
