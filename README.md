@@ -135,6 +135,6 @@ jobs:
 ## Limitations
 - The action does not support searching for a keyword in a multi-line comment.
   - A workaround to this is using the `smart_search: false` parameter as shown in [Checking For Any Instance](#use-case-checking-for-any-instance-of-the-keyword).
-  - This may not be a good workaround for all cases.
+  - This may not be a good workaround for all cases because it will catch usages of the `keyword` _anywhere_ in the files.
 - Due to the nature of regex commands, any inputs using wildcards or special characters (ex. '|', '*'), should be wrapped in quotes. So inputs need to be in the form of `<key>: '"<value-with-regex>"'`
   - This is shown in the [Checking For Files Based On File Extensions](#use-case-checking-for-files-based-on-file-extensions) as well as in [Advanced Searches](#use-case-advanced-searches).
