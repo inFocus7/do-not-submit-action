@@ -1,36 +1,74 @@
 #!/bin/bash
 
 # do-not-submit.sh takes the following arguments:
-# 1. The keyword to cause a failure on
-# 2. Whether the action should pass or fail if a KEYWORD is found ("fail", "warn")
-# 3. The type of search to perform ("smart", anything)
-# 4. A list (as a string) representing which files to check for the keyword.
-# 5. (optional) A list (as a string) representing which files to NOT check for the keyword.
-# 6+ Modified files to check for the keyword.
-#
-# If the keyword is present, the script exits with 1.
-# This initial implementation only checks files for single-line comments.
+# -k (optional) Keyword to cause failure on. Defaults to "DO_NOT_SUBMIT".
+# -w (optional) If toggled, the script will exit with code 0 (non-failure) when keyword instances are found..
+# -x (optional) If toggled, the search type to perform will be set to search for keyword instances anywhere in the files.
+# -c (optional) <list> A list (as a comma-separated string) representing which files to check for the keyword. Defaults to check all files passed.
+# -i (optional) <list> A list (as a comma-separated string) representing which files to NOT check for the keyword.
+# filenames... A list of modified files to check for the keyword.
 
-if [[ "$#" -lt 6 ]]; then
-  echo "Usage: $0 keyword failure_type search_type check_list ignore_list filename [filenames ...]"
-  exit 1
-fi
+help() {
+  echo "Usage: $0 [-k <keyword>] [-w] [-x] [-c <list>] [-i <list>] filenames..."
+}
+
+# Defaults
+SEARCH_TYPE="smart"
+FAILURE_TYPE="fail"
+CHECK_LIST="*"
+KEYWORD="DO_NOT_SUBMIT"
+IGNORE_LIST=""
 
 NEWLINE=$'\n'
 OUTPUT=""
 
-KEYWORD=$1
-# Regardless of failure type we want to exit with 1 so user knows something went wrong.
+# Parsing command-line options
+while getopts ":k:wxc:i:" opt; do
+  case $opt in
+    k)
+      KEYWORD="$OPTARG"
+      ;;
+    w)
+      FAILURE_TYPE="warn"
+      ;;
+    x)
+      SEARCH_TYPE="any"
+      ;;
+    c)
+      CHECK_LIST="$OPTARG"
+      ;;
+    i)
+      IGNORE_LIST="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      help
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      help
+      exit 1
+      ;;
+  esac
+done
+
 if [[ "$KEYWORD" == "" ]]; then
   echo "::error The keyword MUST NOT be empty. Exiting."
   exit 1
 fi
-FAILURE_TYPE=$2
-SEARCH_TYPE=$3
-CHECK_LIST=$4
-IGNORE_LIST=$5
-# Gets the rest of the arguments - which should be the list of files - as an array.
-FILES=("${@:6}")
+
+# Shift to skip over processed options
+shift $((OPTIND - 1))
+
+if [[ $# -eq 0 ]]; then
+  echo "No files provided." >&2
+  help
+  exit 1
+fi
+
+# The remaining arguments are the filenames
+FILES=("$@")
 
 IFS=',' read -ra check_list_array <<< "$CHECK_LIST"
 IFS=',' read -ra ignore_list_array <<< "$IGNORE_LIST"
